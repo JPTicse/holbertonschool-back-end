@@ -1,18 +1,31 @@
 #!/usr/bin/python3
-"""Write a Python script that, using this REST"""
+''' Export data in the CSV format '''
 import csv
-from requests import get
+import requests
 from sys import argv
 
 
-if __name__ == "__main__":
+def get_api():
+    ''' Gather data from an API '''
     url = 'https://jsonplaceholder.typicode.com/'
-    id_user = argv[1]
-    users = get('{}users/{}'.format(url, id_user)).json()
-    username = users.get('username')
-    tasks = get('{}todos?userId={}'.format(url, id_user)).json()
-    with open('{}.csv'.format(id_user), 'wt') as file:
-        write_file = csv.writer(file, quoting=csv.QUOTE_ALL)
-        for task in tasks:
-            write_file.writerow([int(id_user), username,
-                                task.get('completed'), task.get('title')])
+    uid = argv[1]
+
+    # get a specific user from users in jsonplaceholder
+    usr = requests.get(url + 'users/{}'.format(uid)).json()
+    # make a query string to get tasks based on user id
+    todo = requests.get(url + 'todos', params={'userId': uid}).json()
+
+    with open('{}.csv'.format(uid), 'w') as file:
+        writer = csv.writer(file, quoting=csv.QUOTE_ALL)
+        for employee in todo:
+            user_id = uid
+            username = usr.get('username')
+            task_comp = employee.get('completed')
+            task_title = employee.get('title')
+
+            emp_record = [user_id, username, task_comp, task_title]
+            writer.writerow(emp_record)
+
+
+if __name__ == '__main__':
+    get_api()
